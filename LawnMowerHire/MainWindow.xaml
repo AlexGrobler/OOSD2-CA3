@@ -9,9 +9,9 @@
         Title="MainWindow" Height="450" Width="800"
          Loaded="Window_Loaded">
     <Grid>
-        <TabControl>
+        <TabControl x:Name="tabControl">
             <TabItem Header="Main">
-                <Grid>
+                <Grid Background="#F8F8F8">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="0.75*"/>
                         <RowDefinition Height="*"/>
@@ -21,49 +21,62 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0" Grid.Row="0" Background="LightGreen">
-                        <StackPanel Orientation="Horizontal">
-                            <Label>Mower Type</Label>
-                            <ComboBox x:Name="mowerTypeCmbBx"></ComboBox>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Label>Start Date</Label>
-                            <DatePicker x:Name="startDatePckr" DisplayDateStart="{x:Static sys:DateTime.Today}"></DatePicker>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Label>End Date</Label>
-                            <DatePicker x:Name="endDatePckr" DisplayDateStart="{x:Static sys:DateTime.Today}"></DatePicker>
-                        </StackPanel>
-                        <Button x:Name="searchBtn" Content="Search" Click="searchBtn_Click"></Button>
-                    </StackPanel>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0" Grid.Row="1">
-                        <Label>Available Mowers</Label>
-                        <ListBox x:Name="mowerLstBx" Margin="10" Height="160px" Background="AliceBlue" SelectionChanged="mowerLstBx_SelectionChanged"/>
-                    </StackPanel>
+                        <Label HorizontalAlignment="Left" Margin="50 0 0 0" Grid.Row="0" Grid.Column="0" Content="Mower Type"></Label>
+                        <ComboBox Grid.Row="0" Height="25" Width="150" Margin="0 0 10 0" HorizontalAlignment="Right" Grid.Column="1" x:Name="mowerTypeCmbBx"></ComboBox>
 
-                    <Image Grid.Column="2" Grid.Row="0"></Image>
-                    <StackPanel Grid.Column="2" Margin="0,174,0,0" Grid.RowSpan="2">
-                        <TextBlock Name="mowerIdTxt" Text="Mower ID"></TextBlock>
-                        <TextBlock Name="mowerMakeTxt" Text="Make"></TextBlock>
-                        <TextBlock Name="mowerModelTxt" Text="Model"></TextBlock>
-                        <TextBlock Name="mowerRentTxt" Text="Rental Date"></TextBlock>
-                        <TextBlock Name="mowerReturnTxt" Text="Return Date"></TextBlock>
-                        <Button x:Name="bookBtn" Content="Book" Click="bookBtn_Click"></Button>
+                        <Label HorizontalAlignment="Left" Margin="50 0 0 0" Grid.Row="1" Grid.Column="0" Content="Start Date"></Label>
+                        <DatePicker x:Name="startDatePckr" Height="25" Width="100" Margin="0 0 10 0" HorizontalAlignment="Right" Grid.Row="1" Grid.Column="1" DisplayDateStart="{x:Static sys:DateTime.Today}"></DatePicker>
+
+                        <Label HorizontalAlignment="Left" Margin="50 0 0 0" Grid.Row="2" Grid.Column="0" Content="End Date"></Label>
+                        <DatePicker x:Name="endDatePckr" Height="25" Width="100" Margin="0 0 10 0" HorizontalAlignment="Right" Grid.Row="2" Grid.Column="1"  DisplayDateStart="{x:Static sys:DateTime.Today}"></DatePicker>
+
+                        <Button x:Name="searchBtn" Height="25" Width="55" Margin="0 0 10 0" HorizontalAlignment="Right" Grid.Row="3" Grid.Column="1" Content="Search" Click="searchBtn_Click"></Button>
+                    </Grid>
+
+                    <Grid Grid.Column="0" Grid.Row="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="0.15*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="0" Margin="10 0 0 0" Content="Available Mowers" FontWeight="Bold" FontSize="15px"></Label>
+                        <ListBox x:Name="mowerLstBx" Grid.Row="1" Margin="10" Background="AliceBlue" SelectionChanged="mowerLstBx_SelectionChanged"/>
+                    </Grid>
+
+                    <Image x:Name="mowerImg"  Grid.Row="0" Grid.Column="2"></Image>
+                    <StackPanel Grid.Row="1" Grid.Column="2" Grid.RowSpan="2" Margin="5">
+                        <TextBlock x:Name="mowerIdTxt" Text="Mower ID" Padding="5"></TextBlock>
+                        <TextBlock x:Name="mowerMakeTxt" Text="Make" Padding="5"></TextBlock>
+                        <TextBlock x:Name="mowerModelTxt" Text="Model" Padding="5"></TextBlock>
+                        <TextBlock x:Name="mowerRentTxt" Text="Rental Date" Padding="5"></TextBlock>
+                        <TextBlock x:Name="mowerReturnTxt" Text="Return Date" Padding="5"></TextBlock>
                     </StackPanel>
+                    <Button  Grid.Row="1" Grid.Column="2" x:Name="bookBtn" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10" Content="Book" Height="25" Width="100" Click="bookBtn_Click"></Button>
+
                 </Grid>
             </TabItem>
             <TabItem Header="Mowers">
-                <DataGrid Name="mowerTable" AutoGenerateColumns="True"></DataGrid>
+                <DataGrid x:Name="mowerTable" Margin="10"  AutoGenerateColumns="True"></DataGrid>
             </TabItem>
             <TabItem Header="Bookings">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
-                        <RowDefinition Height="0.1*"/>
+                        <RowDefinition Height="0.15*"/>
                     </Grid.RowDefinitions>
-                    <DataGrid Grid.Row="0" Name="bookingsTable" AutoGenerateColumns="True"/>
-                    <Button Grid.Row="1" Name="deleteBookingBtn" Content="delete" Click="deleteBookingBtn_Click"/>
+                    <DataGrid x:Name="bookingsTable" Margin="5" Grid.Row="0" AutoGenerateColumns="True"/>
+                    <Button  x:Name="deleteBookingBtn" HorizontalAlignment="Right" Margin="0 0 50 0" Height="25" Width="100" Grid.Row="1" Content="Delete Entry" Click="deleteBookingBtn_Click"/>
                 </Grid>
             </TabItem>
         </TabControl>

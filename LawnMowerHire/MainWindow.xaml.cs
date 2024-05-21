@@ -20,7 +20,6 @@ namespace LawnMowerHire
         private MowerHireData db;
         private ObservableCollection<Mower> mowers;
 
-
         public MainWindow()
         {
             InitializeComponent();
@@ -43,6 +42,7 @@ namespace LawnMowerHire
             mowerModelTxt.Text = string.Empty;
             mowerRentTxt.Text = string.Empty;
             mowerReturnTxt.Text = string.Empty;
+            mowerImg.Source = null;
         }
 
         private void LoadMowerListBox()
@@ -63,8 +63,8 @@ namespace LawnMowerHire
             mowerTable.ItemsSource = db.Mowers.Select(m => new {
                 m.MowerId,
                 m.MowerType,
-                m.Model,
                 m.Make,
+                m.Model,
                 Bookings = m.Bookings.Count
             }).ToList();
         }
@@ -73,10 +73,10 @@ namespace LawnMowerHire
         {
             bookingsTable.ItemsSource = db.Bookings.Select(b => new {
                 b.BookingId,
-                b.RentDate,
-                b.ReturnDate,
                 b.Mower.Make,
-                b.Mower.Model
+                b.Mower.Model,
+                b.RentDate,
+                b.ReturnDate
             }).ToList();
         }
 
@@ -155,8 +155,10 @@ namespace LawnMowerHire
                 db.Bookings.Add(booking);
                 db.SaveChanges();
                 LoadBookingsTable();
+                LoadMowersTable();
+                mowerLstBx.SelectedItem = null;
 
-                MessageBox.Show($"Booking for {mower.Make} confirmed,\n Start Date {booking.RentDate.ToShortDateString()},\n End Date {booking.ReturnDate.ToShortDateString()}");
+                MessageBox.Show($"Booking confirmation:\n\n Mower Id: {mower.MowerId}\n Make: {mower.Make}\n Model: {mower.Model}\n Rental Date: {booking.RentDate.ToShortDateString()}\n Return Date: {booking.ReturnDate.ToShortDateString()}");
 
             }
             else
@@ -170,6 +172,12 @@ namespace LawnMowerHire
         {
             if (bookingsTable.SelectedItem != null)
             {
+                MessageBoxResult result = MessageBox.Show("Are you sure you want to remove this booking?", "", MessageBoxButton.YesNo,MessageBoxImage.Warning);
+                if (result == MessageBoxResult.No)
+                {
+                    return;
+                }
+
                 var selectedEntry = (dynamic)bookingsTable.SelectedItem;
                 int bookingId = selectedEntry.BookingId;
                 Booking booking = db.Bookings.FirstOrDefault(b => b.BookingId == bookingId);
@@ -178,6 +186,7 @@ namespace LawnMowerHire
                     db.Bookings.Remove(booking);
                     db.SaveChanges();
                     LoadBookingsTable();
+                    LoadMowersTable();
                 }
                 else 
                 {
@@ -200,11 +209,18 @@ namespace LawnMowerHire
                 mowerRentTxt.Text = "Rental Date: " + (rentDate != null ? rentDate.Value.ToShortDateString() : "");
                 mowerReturnTxt.Text = "Return Date: " + (returnDate != null ? returnDate.Value.ToShortDateString() : "");
 
-
-                /*      if (mower.MowerType == "Strimmer")
-                      {
-                          mowerImg.Source = new BitmapImage(new Uri($"pack://application:,,,/OOSD2-CA3;component/images/strimmer.png"));
-                      }*/
+                if (mower.MowerType == "Strimmer")
+                {
+                    mowerImg.Source = new BitmapImage(new Uri("pack://application:,,,/LawnMowerHire;component/images/strimmer.png"));
+                }
+                if (mower.MowerType == "Sit On")
+                {
+                    mowerImg.Source = new BitmapImage(new Uri("pack://application:,,,/LawnMowerHire;component/images/siton.png"));
+                }
+                if (mower.MowerType == "Push Mower")
+                {
+                    mowerImg.Source = new BitmapImage(new Uri("pack://application:,,,/LawnMowerHire;component/images/push.png"));
+                }
             }
             else
             {
