@@ -23,9 +23,12 @@ namespace LawnMowerHire
         public MainWindow()
         {
             InitializeComponent();
+            //initualize db
             db = new MowerHireData();
         }
 
+ 
+        //load data from db on window load
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             LoadMowerListBox();
@@ -35,6 +38,7 @@ namespace LawnMowerHire
             ResetMowerDetails();
         }
 
+        //reset displayed info on window load, or after making a booking
         private void ResetMowerDetails()
         {
             mowerIdTxt.Text = string.Empty;
@@ -45,19 +49,23 @@ namespace LawnMowerHire
             mowerImg.Source = null;
         }
 
+        //populate mower listbox with data fro mdb
         private void LoadMowerListBox()
         {
             mowers = new ObservableCollection<Mower>(db.Mowers.ToList());
             mowerLstBx.ItemsSource = mowers;
         }
 
+        //set possible types of mower
         private void LoadMowerTypes()
         {
-            var mowerTypes = new List<string> {"All", "Strimmer", "Sit On", "Push Mower" };
+            var mowerTypes = db.Mowers.Select(m => m.MowerType).ToList(); //get possible mower types from db to avoid doing it manually
+            mowerTypes.Add("All"); //will be used to display all mowers
             mowerTypeCmbBx.ItemsSource = mowerTypes;
             mowerTypeCmbBx.SelectedIndex = 0;
         }
 
+        //set mower datagrid itemsource to collection with desired columns, derived from db
         private void LoadMowersTable()
         {
             mowerTable.ItemsSource = db.Mowers.Select(m => new {
@@ -69,6 +77,7 @@ namespace LawnMowerHire
             }).ToList();
         }
 
+        //set bookings datagrid itemsource to collection with desired columns, derived from db
         private void LoadBookingsTable()
         {
             bookingsTable.ItemsSource = db.Bookings.Select(b => new {
@@ -80,6 +89,7 @@ namespace LawnMowerHire
             }).ToList();
         }
 
+        //filter mowers for displaying in listbox
         private void searchBtn_Click(object sender, RoutedEventArgs e)
         {
             string selectedType = mowerTypeCmbBx.SelectedItem.ToString();
@@ -115,6 +125,7 @@ namespace LawnMowerHire
             mowerLstBx.ItemsSource = availableMowers;
         }
 
+        //make a new booking
         private void bookBtn_Click(object sender, RoutedEventArgs e)
         {
             if (mowerLstBx.SelectedItem != null)
@@ -123,8 +134,6 @@ namespace LawnMowerHire
                 DateTime? endDate = endDatePckr.SelectedDate;
                 Mower mower = (Mower)mowerLstBx.SelectedItem;
 
-                //need to also check if the selected date overlaps with existing date
-                //also make sure start date isn't greater than end date
                 if (startDate == null || endDate == null)
                 {
                     MessageBox.Show("Please choose a date");
@@ -139,6 +148,7 @@ namespace LawnMowerHire
 
                 //get all bookins within the same range as the desired booking, check if they overlap
                 List<Booking> existingBookings = mower.Bookings.Where(b => b.RentDate <= endDate && startDate <= b.ReturnDate).ToList();
+                //if count is greater than 0, that means that there are overlapping dates
                 if (existingBookings.Count() > 0) 
                 {
                     MessageBox.Show("Already have a booking or bookings overlapping with that date");
@@ -154,12 +164,13 @@ namespace LawnMowerHire
 
                 db.Bookings.Add(booking);
                 db.SaveChanges();
-                LoadBookingsTable();
-                LoadMowersTable();
+                LoadBookingsTable(); //refresh datagrid with updated data
+                LoadMowersTable(); //refresh datagrid with updated data
                 mowerLstBx.SelectedItem = null;
 
                 MessageBox.Show($"Booking confirmation:\n\n Mower Id: {mower.MowerId}\n Make: {mower.Make}\n Model: {mower.Model}\n Rental Date: {booking.RentDate.ToShortDateString()}\n Return Date: {booking.ReturnDate.ToShortDateString()}");
 
+                tabControl.SelectedIndex = 2; // navigate to bookings tab
             }
             else
             {
@@ -167,26 +178,27 @@ namespace LawnMowerHire
             }
         }
 
-
+        //delete a booking
         private void deleteBookingBtn_Click(object sender, RoutedEventArgs e)
         {
             if (bookingsTable.SelectedItem != null)
             {
+                //confimration message, done before querying database for efficiency
                 MessageBoxResult result = MessageBox.Show("Are you sure you want to remove this booking?", "", MessageBoxButton.YesNo,MessageBoxImage.Warning);
                 if (result == MessageBoxResult.No)
                 {
                     return;
                 }
 
-                var selectedEntry = (dynamic)bookingsTable.SelectedItem;
-                int bookingId = selectedEntry.BookingId;
-                Booking booking = db.Bookings.FirstOrDefault(b => b.BookingId == bookingId);
+                var selectedEntry = (dynamic)bookingsTable.SelectedItem; //have to use dynamic type here, since the datagrid is not of Booking type due to changing displayed columns
+                int bookingId = selectedEntry.BookingId; //get id from grid item
+                Booking booking = db.Bookings.FirstOrDefault(b => b.BookingId == bookingId); //use id to get original booking
                 if (booking != null)
                 {
                     db.Bookings.Remove(booking);
                     db.SaveChanges();
-                    LoadBookingsTable();
-                    LoadMowersTable();
+                    LoadBookingsTable(); //refresh datagrid with updated data
+                    LoadMowersTable(); //refresh datagrid with updated data
                 }
                 else 
                 {
@@ -195,6 +207,7 @@ namespace LawnMowerHire
             }
         }
 
+        //update displayed data when listbox selection has changed
         private void mowerLstBx_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             ListBox listBox = sender as ListBox;
